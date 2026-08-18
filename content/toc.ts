@@ -107,13 +107,6 @@ export const tocSections: TocSection[] = [
         built: true,
       },
       {
-        id: "river-body",
-        title: "River Body",
-        folio: folioOf("river-body"),
-        spreadIndex: spreadOf("river-body"),
-        built: true,
-      },
-      {
         id: "sea-barrel",
         title: "Sea Barrel",
         folio: folioOf("sea-barrel"),
@@ -125,6 +118,13 @@ export const tocSections: TocSection[] = [
         title: "World Forever",
         folio: folioOf("world-forever"),
         spreadIndex: spreadOf("world-forever"),
+        built: true,
+      },
+      {
+        id: "river-body",
+        title: "River Body",
+        folio: folioOf("river-body"),
+        spreadIndex: spreadOf("river-body"),
         built: true,
       },
       {

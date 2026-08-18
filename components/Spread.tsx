@@ -3,6 +3,7 @@
 import IndexPage from "@/components/IndexPage";
 import SectionPhotoEssay from "@/components/SectionPhotoEssay";
 import SectionPoemSpread from "@/components/SectionPoemSpread";
+import SectionRiverBodySpread from "@/components/SectionRiverBodySpread";
 import SectionTitleSpread from "@/components/SectionTitleSpread";
 import { getWorkBySpreadIndex } from "@/content/works";
 
@@ -27,6 +28,10 @@ export default function Spread({ spreadIndex, onNavigate }: SpreadProps) {
 
   if (work?.kind === "photography" && work.images.length >= 1) {
     return <SectionPhotoEssay work={work} />;
+  }
+
+  if (work?.id === "river-body") {
+    return <SectionRiverBodySpread work={work} />;
   }
 
   if (work?.poem || work?.poemLayouts?.length) {

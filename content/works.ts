@@ -150,54 +150,13 @@ for the return.`,
   },
 
   {
-    id: "river-body",
-    title: "River Body",
+    id: "sea-barrel",
+    title: "Sea Barrel",
     kind: "writing",
     year: "2021",
     indexNumber: "03",
     folio: 8,
     spreadIndex: 3,
-    dek: "Ecopoetry",
-    images: [],
-    poem: `I’m gripped, sometimes, by sudden grief 
-for everything I’ll never know.
-
-A baby-bird feeling overtakes me,
-feeble-hearted feathery mess crooked
-in its nesting against the roof flashing.
-	Even my words curl away from me,
-	& I’m left aching.
-
-As an antidote, I become a river,
-
-a body channeling
-into some bigger body—
-until all of myself is a rushing
-vessel.
- No constraint. 
-I hold myself only.
-
-As the river, I reflect everything
-& hold everything I reflect,
-	unfaltering.
-
-& I am enthralled
-by everything 
-I am,
-
-my tangerine-pulp water—
-my moving fish—
-every existence a flashing caught
-in my own wet grip.`,
-  },
-  {
-    id: "sea-barrel",
-    title: "Sea Barrel",
-    kind: "writing",
-    year: "2021",
-    indexNumber: "04",
-    folio: 10,
-    spreadIndex: 4,
     dek: "Ecopoetry",
     images: [],
     poem: `	Roll over on
@@ -225,15 +184,15 @@ space that contained you.`,
     title: "World Forever",
     kind: "writing",
     year: "2022",
-    indexNumber: "05",
-    folio: 12,
-    spreadIndex: 5,
+    indexNumber: "04",
+    folio: 10,
+    spreadIndex: 4,
     dek: "Ecopoetry",
     images: [],
     poemLayouts: [
       {
-        spreadIndex: 5,
-        folio: 12,
+        spreadIndex: 4,
+        folio: 10,
         left: "title",
         right: {
           text: `Little things catch my eye:
@@ -267,8 +226,8 @@ What a privilege it is right now
         },
       },
       {
-        spreadIndex: 6,
-        folio: 14,
+        spreadIndex: 5,
+        folio: 12,
         left: {
           heading: "Reimagining The Great Meadow",
           attribution: "MKD",
@@ -325,6 +284,54 @@ Nothing to fear.`,
         },
       },
     ],
+  },
+  {
+    id: "river-body",
+    title: "River Body",
+    kind: "writing",
+    year: "2021",
+    indexNumber: "05",
+    folio: 14,
+    spreadIndex: 6,
+    dek: "Ecopoetry",
+    images: [
+      {
+        src: "/images/river-body/april-mill.jpg",
+        alt: "Woman in a light dress standing on river driftwood, holding a white cloth open against bare winter trees",
+        dimensions: "678 × 1024",
+        aspectRatio: "2 / 3",
+      },
+    ],
+    poem: `I’m gripped, sometimes, by sudden grief 
+for everything I’ll never know.
+
+A baby-bird feeling overtakes me,
+feeble-hearted feathery mess crooked
+in its nesting against the roof flashing.
+	Even my words curl away from me,
+	& I’m left aching.
+
+As an antidote, I become a river,
+
+a body channeling
+into some bigger body—
+until all of myself is a rushing
+vessel.
+ No constraint. 
+I hold myself only.
+
+As the river, I reflect everything
+& hold everything I reflect,
+	unfaltering.
+
+& I am enthralled
+by everything 
+I am,
+
+my tangerine-pulp water—
+my moving fish—
+every existence a flashing caught
+in my own wet grip.`,
   },
   {
     id: "march-spell-for-looking",

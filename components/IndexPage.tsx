@@ -49,12 +49,13 @@ export default function IndexPage({ onNavigate }: IndexPageProps) {
           Contents
         </h2>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-[1em] overflow-hidden">
-          {leftSections.map((section) => (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {leftSections.map((section, index) => (
             <TocSectionBlock
               key={section.id}
               section={section}
               onNavigate={onNavigate}
+              spaceAbove={index > 0 ? "1.85em" : undefined}
             />
           ))}
         </div>
@@ -83,18 +84,24 @@ export default function IndexPage({ onNavigate }: IndexPageProps) {
 function TocSectionBlock({
   section,
   onNavigate,
+  spaceAbove,
 }: {
   section: TocSection;
   onNavigate: (spreadIndex: number) => void;
+  /** Extra space above the heading — keeps heading attached to its entries */
+  spaceAbove?: string;
 }) {
   return (
-    <section className="min-w-0 shrink-0">
+    <section
+      className="min-w-0 shrink-0"
+      style={spaceAbove ? { marginTop: spaceAbove } : undefined}
+    >
       <h3
         className="display mb-[0.35em] text-[var(--ink)]"
         style={{
           fontSize: "clamp(0.92rem, 1.55cqw, 1.12rem)",
           fontWeight: 400,
-          fontStyle: "italic",
+          fontStyle: "normal",
           lineHeight: 1.1,
         }}
       >

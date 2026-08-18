@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Cover from "@/components/Cover";
 import Spread from "@/components/Spread";
-import { getMaxSpreadIndex, getWorkTitleForSpread } from "@/content/toc";
+import { getMaxSpreadIndex } from "@/content/toc";
 import { getWorkBySpreadIndex, workLabel } from "@/content/works";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
@@ -120,12 +120,6 @@ export default function Issue() {
   const rotateY = turning ? -180 * turnProgress : 0;
 
   const activeWork = getWorkBySpreadIndex(spreadIndex);
-  const projectTitle =
-    spreadIndex === 0
-      ? null
-      : activeWork
-        ? workLabel(activeWork)
-        : getWorkTitleForSpread(spreadIndex);
 
   const liveMessage =
     mode === "cover"
@@ -152,13 +146,6 @@ export default function Issue() {
       >
         Contents
       </button>
-
-      {/* Project title — every spread has its own */}
-      {mode === "open" && !turning && projectTitle ? (
-        <p className="utility pointer-events-none absolute top-[10px] right-[10px] z-40 text-[var(--ink-soft)] md:right-[calc(2vw+10px)]">
-          {projectTitle}
-        </p>
-      ) : null}
 
       <div
         className="magazine-stage relative h-[min(92dvh,100%)] w-[min(96vw,calc(92dvh*1.45))]"
