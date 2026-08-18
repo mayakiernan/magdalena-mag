@@ -155,21 +155,46 @@ export default function Cover({ onOpen, turning = false }: CoverProps) {
         />
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-[2.5%] z-20 flex justify-center px-[3%]">
-        <h1
-          className="display text-center text-[var(--masthead)] uppercase"
+      <div className="pointer-events-none absolute inset-x-0 top-[2.5%] z-20 px-[3%]">
+        <div className="flex justify-center">
+          <h1
+            className="display text-center text-[var(--masthead)] uppercase"
+            style={{
+              fontSize: "clamp(2.05rem, 14.75cqw, 5rem)",
+              fontWeight: 600,
+              lineHeight: 1.2,
+              whiteSpace: "nowrap",
+              paddingTop: "0.08em",
+              letterSpacing: "0.02em",
+              paddingLeft: "0.02em",
+            }}
+          >
+            Magdalena
+          </h1>
+        </div>
+        <div
+          className="absolute top-full right-[3%] mt-[0.35em] flex flex-col items-end gap-[0.15em] text-right"
           style={{
-            fontSize: "clamp(2.05rem, 14.75cqw, 5rem)",
-            fontWeight: 600,
-            lineHeight: 1.2,
-            whiteSpace: "nowrap",
-            paddingTop: "0.08em",
-            letterSpacing: "0.02em",
-            paddingLeft: "0.02em",
+            fontFamily: "var(--font-display)",
+            color: "var(--masthead)",
+            fontSize: "clamp(0.7rem, 1.6cqw, 0.85rem)",
+            fontWeight: 400,
+            letterSpacing: "0.01em",
+            lineHeight: 1.35,
           }}
         >
-          Magdalena
-        </h1>
+          <p className="m-0">{issueMeta.location}</p>
+          <p className="m-0">
+            <a
+              href={`mailto:${issueMeta.email}`}
+              className="pointer-events-auto underline-offset-4 [text-decoration-thickness:1px] hover:underline"
+              style={{ textDecorationColor: "var(--masthead)" }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {issueMeta.email}
+            </a>
+          </p>
+        </div>
       </div>
 
       <div
@@ -194,37 +219,6 @@ export default function Cover({ onOpen, turning = false }: CoverProps) {
           </p>
         ))}
       </div>
-
-      <footer className="pointer-events-none absolute inset-x-0 bottom-[calc(10px+env(safe-area-inset-bottom))] z-20 px-[10px]">
-        <div className="flex flex-col items-start gap-[0.15rem] text-[var(--paper)]">
-          <p
-            className="utility opacity-90"
-            style={{
-              fontSize: "var(--type-utility-sm)",
-              letterSpacing: "0.16em",
-            }}
-          >
-            {issueMeta.location}
-          </p>
-          <p
-            className="utility opacity-90"
-            style={{
-              fontSize: "var(--type-utility-sm)",
-              letterSpacing: "0.16em",
-            }}
-          >
-            Contact:{" "}
-            <a
-              href={`mailto:${issueMeta.email}`}
-              className="pointer-events-auto underline-offset-4 [text-decoration-thickness:1px] hover:underline"
-              style={{ textDecorationColor: "var(--registration)" }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              {issueMeta.email}
-            </a>
-          </p>
-        </div>
-      </footer>
 
       <div
         className="pointer-events-none absolute right-0 bottom-0 z-40 origin-bottom-right"

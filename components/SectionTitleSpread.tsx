@@ -1,7 +1,6 @@
 "use client";
 
 import type { Work } from "@/content/works";
-import { workLabel } from "@/content/works";
 import Folio from "@/components/Folio";
 
 /** Title-only placeholder spread for forthcoming works */
@@ -18,9 +17,6 @@ export default function SectionTitleSpread({ work }: { work: Work }) {
           boxShadow: "inset -12px 0 18px -14px var(--gutter-shade)",
         }}
       >
-        <p className="utility-label mb-[0.75em] text-[var(--ink-soft)]">
-          {workLabel(work)}
-        </p>
         <h2
           className="display text-[var(--ink)]"
           style={{
@@ -32,12 +28,9 @@ export default function SectionTitleSpread({ work }: { work: Work }) {
         >
           {work.title}
         </h2>
-        {work.dek ? (
-          <p
-            className="utility-fine mt-[1.25em] text-[var(--ink-soft)]"
-            style={{ fontStyle: "italic" }}
-          >
-            {work.dek}
+        {work.dateLabel ? (
+          <p className="utility-fine absolute bottom-[10px] left-[10px] text-[var(--ink-soft)]">
+            {work.dateLabel}
           </p>
         ) : null}
       </article>

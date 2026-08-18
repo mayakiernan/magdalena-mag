@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import type { PoemPageContent, Work } from "@/content/works";
-import { getPoemLayoutForSpread, workLabel } from "@/content/works";
+import { getPoemLayoutForSpread } from "@/content/works";
 import Folio from "@/components/Folio";
 import LetterGridTitle, {
   GRAY_BOWL_TITLE_ROWS,
@@ -92,9 +92,6 @@ function TitlePlate({ work }: { work: Work }) {
         boxShadow: "inset -12px 0 18px -14px var(--gutter-shade)",
       }}
     >
-      <p className="utility-label mb-[0.75em] text-[var(--ink-soft)]">
-        {workLabel(work)}
-      </p>
       <h2
         className="display text-[var(--ink)]"
         style={{
@@ -106,6 +103,11 @@ function TitlePlate({ work }: { work: Work }) {
       >
         {work.title}
       </h2>
+      {work.dateLabel ? (
+        <p className="utility-fine absolute bottom-[10px] left-[10px] text-[var(--ink-soft)]">
+          {work.dateLabel}
+        </p>
+      ) : null}
     </article>
   );
 }
