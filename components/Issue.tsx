@@ -10,10 +10,14 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 
 type Mode = "cover" | "open";
 
+const COVER_TURN_MS = 900;
 const FLIP_TOTAL_MS = 1100;
 const FLIP_MIN_STEP_MS = 70;
 const FLIP_MAX_STEP_MS = 320;
 const MAX_SPREAD = getMaxSpreadIndex();
+
+/** Closed cover sits on the right half; shift stage left so that half reads centered. */
+const COVER_STAGE_SHIFT = -25;
 
 function stepDurations(stepCount: number): number[] {
   if (stepCount <= 0) return [];
@@ -39,6 +43,11 @@ export default function Issue() {
   const [mode, setMode] = useState<Mode>("cover");
   const [spreadIndex, setSpreadIndex] = useState(0);
 
+  /** 1 = opening, -1 = closing */
+  const [coverDir, setCoverDir] = useState<1 | -1>(1);
+  const [coverTurning, setCoverTurning] = useState(false);
+  const [coverProgress, setCoverProgress] = useState(0);
+
   const [flipOver, setFlipOver] = useState(0);
   const [flipUnder, setFlipUnder] = useState(0);
   const [flipProgress, setFlipProgress] = useState(0);
@@ -55,10 +64,60 @@ export default function Issue() {
   }, [spreadIndex]);
 
   const openIssue = useCallback(() => {
-    if (isFlipping || mode === "open") return;
-    setMode("open");
+    if (coverTurning || isFlipping || mode === "open") return;
+
+    if (reducedMotion) {
+      setMode("open");
+      setSpreadIndex(0);
+      return;
+    }
+
+    setCoverDir(1);
+    setCoverProgress(0);
     setSpreadIndex(0);
-  }, [isFlipping, mode]);
+    setCoverTurning(true);
+  }, [coverTurning, isFlipping, mode, reducedMotion]);
+
+  const closeToCover = useCallback(() => {
+    if (coverTurning || isFlipping || mode !== "open") return;
+    if (spreadIndexRef.current !== 0) return;
+
+    if (reducedMotion) {
+      setMode("cover");
+      return;
+    }
+
+    setCoverDir(-1);
+    setCoverProgress(0);
+    setCoverTurning(true);
+  }, [coverTurning, isFlipping, mode, reducedMotion]);
+
+  useEffect(() => {
+    if (!coverTurning) return;
+
+    let raf = 0;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / COVER_TURN_MS);
+      setCoverProgress(easeOutCubic(t));
+      if (t < 1) {
+        raf = window.requestAnimationFrame(tick);
+      } else {
+        if (coverDir === 1) {
+          setMode("open");
+          setSpreadIndex(0);
+        } else {
+          setMode("cover");
+        }
+        setCoverTurning(false);
+        setCoverProgress(0);
+      }
+    };
+
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [coverTurning, coverDir]);
 
   const runFlipSequence = useCallback(
     async (fromStart: number, initialTarget: number, runId: number) => {
@@ -122,7 +181,7 @@ export default function Issue() {
 
   const goToSpread = useCallback(
     (next: number) => {
-      if (mode !== "open") return;
+      if (mode !== "open" || coverTurning) return;
       if (next < 0 || next > MAX_SPREAD) return;
 
       const from = isFlipping
@@ -133,7 +192,6 @@ export default function Issue() {
 
       if (next === from && !isFlipping) return;
 
-      // Single-step interior turns stay instant.
       if (!reducedMotion && Math.abs(next - from) === 1 && !isFlipping) {
         setSpreadIndex(next);
         spreadIndexRef.current = next;
@@ -170,16 +228,23 @@ export default function Issue() {
       const runId = ++flipRunIdRef.current;
       void runFlipSequence(from, next, runId);
     },
-    [mode, reducedMotion, isFlipping, flipProgress, runFlipSequence],
+    [
+      mode,
+      coverTurning,
+      reducedMotion,
+      isFlipping,
+      flipProgress,
+      runFlipSequence,
+    ],
   );
 
   const returnToContents = useCallback(() => {
-    if (mode !== "open") return;
+    if (mode !== "open" || coverTurning) return;
     goToSpread(0);
-  }, [mode, goToSpread]);
+  }, [mode, coverTurning, goToSpread]);
 
   useEffect(() => {
-    if (mode !== "cover") return;
+    if (mode !== "cover" || coverTurning) return;
 
     const onWheel = (event: WheelEvent) => {
       if (event.deltaY > 24) {
@@ -190,10 +255,10 @@ export default function Issue() {
 
     window.addEventListener("wheel", onWheel, { passive: false });
     return () => window.removeEventListener("wheel", onWheel);
-  }, [mode, openIssue]);
+  }, [mode, coverTurning, openIssue]);
 
   useEffect(() => {
-    if (mode !== "open") return;
+    if (mode !== "open" || coverTurning) return;
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "ArrowRight") {
@@ -202,7 +267,7 @@ export default function Issue() {
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
         if (spreadIndexRef.current === 0 && !isFlipping) {
-          setMode("cover");
+          closeToCover();
           return;
         }
         goToSpread(spreadIndexRef.current - 1);
@@ -212,7 +277,7 @@ export default function Issue() {
       } else if (event.key === "Escape") {
         event.preventDefault();
         if (spreadIndexRef.current === 0 && !isFlipping) {
-          setMode("cover");
+          closeToCover();
         } else {
           goToSpread(0);
         }
@@ -221,20 +286,43 @@ export default function Issue() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [mode, isFlipping, goToSpread]);
+  }, [mode, coverTurning, isFlipping, goToSpread, closeToCover]);
+
+  // Opening: 0→1 clears the -25% shift and turns the cover.
+  // Closing: 0→1 restores the shift and closes the cover.
+  const openAmount =
+    coverTurning
+      ? coverDir === 1
+        ? coverProgress
+        : 1 - coverProgress
+      : mode === "open"
+        ? 1
+        : 0;
+
+  const stageShift = COVER_STAGE_SHIFT * (1 - openAmount);
+  const coverRotateY = -180 * openAmount;
+  const showCover = mode === "cover" || coverTurning;
+  // Interior only when fully open — hide for the entire cover open/close turn
+  // so neither direction peeks the left page under a half-turned cover.
+  const showSpread = mode === "open" && !coverTurning;
+  const busy = coverTurning || isFlipping;
 
   const activeWork = getWorkBySpreadIndex(spreadIndex);
 
   const liveMessage =
     mode === "cover"
       ? "Cover. Open the issue to begin."
-      : isFlipping
-        ? "Turning pages."
-        : spreadIndex === 0
-          ? "Contents."
-          : activeWork
-            ? `Page ${activeWork.folio}. ${workLabel(activeWork)}, ${activeWork.kind}, ${activeWork.year}.`
-            : `Spread ${spreadIndex}.`;
+      : coverTurning
+        ? coverDir === 1
+          ? "Opening the issue."
+          : "Closing the issue."
+        : isFlipping
+          ? "Turning pages."
+          : spreadIndex === 0
+            ? "Contents."
+            : activeWork
+              ? `Page ${activeWork.folio}. ${workLabel(activeWork)}, ${activeWork.kind}, ${activeWork.year}.`
+              : `Spread ${spreadIndex}.`;
 
   return (
     <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-[var(--stage)] text-[var(--ink)]">
@@ -265,13 +353,33 @@ export default function Issue() {
         ?
       </button>
 
-      <div className="magazine-stage relative h-[min(92dvh,100%)] w-[min(96vw,calc(92dvh*1.45))]">
-        {mode === "open" ? (
-          <div className="absolute inset-0 z-0">
+      {/*
+        Landscape stage at all times. Closed: translated so the right-half
+        cover reads centered. Opening: only transform (and optional opacity).
+      */}
+      <div
+        className="magazine-stage relative h-[min(92dvh,100%)] w-[min(96vw,calc(92dvh*1.45))]"
+        style={{
+          perspective: "2400px",
+          perspectiveOrigin: "50% 50%",
+          transformStyle: "preserve-3d",
+          transform: `translateX(${stageShift}%)`,
+          willChange: coverTurning ? "transform" : "auto",
+          pointerEvents: coverTurning ? "none" : "auto",
+        }}
+      >
+        {showSpread ? (
+          <div
+            className="absolute inset-0 z-0"
+            style={{ transformStyle: "preserve-3d" }}
+          >
             <Spread spreadIndex={spreadIndex} onNavigate={goToSpread} />
 
             {isFlipping ? (
-              <div className="pointer-events-none absolute inset-0 z-20">
+              <div
+                className="pointer-events-none absolute inset-0 z-20"
+                style={{ transformStyle: "preserve-3d" }}
+              >
                 <FlipLeaf
                   underIndex={flipUnder}
                   overIndex={flipOver}
@@ -281,7 +389,7 @@ export default function Issue() {
               </div>
             ) : null}
 
-            {!isFlipping ? (
+            {!busy ? (
               <>
                 <button
                   type="button"
@@ -289,7 +397,7 @@ export default function Issue() {
                   className="absolute top-0 left-0 z-30 h-full w-[12%] cursor-w-resize bg-transparent"
                   onClick={() => {
                     if (spreadIndex === 0) {
-                      setMode("cover");
+                      closeToCover();
                       return;
                     }
                     goToSpread(spreadIndex - 1);
@@ -304,20 +412,42 @@ export default function Issue() {
               </>
             ) : null}
           </div>
-        ) : (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
+        ) : null}
+
+        {showCover ? (
+          <div
+            className="absolute inset-y-0 right-0 z-10 w-1/2"
+            style={{
+              transformOrigin: "left center",
+              transformStyle: "preserve-3d",
+              transform: `rotateY(${coverRotateY}deg)`,
+              willChange: coverTurning ? "transform" : "auto",
+              boxShadow: openAmount < 1 ? "var(--sheet-shadow)" : undefined,
+            }}
+          >
             <div
-              className="relative h-full bg-[var(--paper)]"
+              className="absolute inset-0 overflow-hidden bg-[var(--paper)]"
               style={{
-                aspectRatio: "3 / 4",
-                maxWidth: "100%",
-                boxShadow: "var(--sheet-shadow)",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transformStyle: "preserve-3d",
               }}
             >
-              <Cover onOpen={openIssue} />
+              <Cover onOpen={openIssue} turning={coverTurning} />
             </div>
+
+            <div
+              className="absolute inset-0 bg-[var(--paper)]"
+              style={{
+                transform: "rotateY(180deg)",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                boxShadow: "inset 12px 0 18px -14px var(--gutter-shade)",
+              }}
+              aria-hidden
+            />
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="sr-only" aria-live="polite">
