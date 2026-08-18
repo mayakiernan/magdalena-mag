@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f7f7f4;
+  --ink: #0b0b0b;
+  --ink-soft: #6b6b66;
+  --rule: #d8d8d2;
+  --registration: #ec008c;
+  --gutter-shade: rgba(11, 11, 11, 0.16);
+  /* Cover masthead — Harper’s Bazaar pastel lavender */
+  --masthead: #c9a8c0;
+  /* Stage behind the floating digital magazine */
+  --stage: #ffffff;
+  /* Soft drop for the cover sheet — digital magazine affordance */
+  --sheet-shadow: 0 18px 48px rgba(11, 11, 11, 0.18),
+    0 4px 12px rgba(11, 11, 11, 0.08);
+  /* Underside of the corner peel */
+  --peel-face: #cfcfc9;
+  --peel-face-deep: #b0b0aa;
+
+  --font-display: var(--font-bodoni-moda), "Times New Roman", serif;
+  --font-utility: var(--font-archivo), "Helvetica Neue", sans-serif;
+  --font-body: var(--font-newsreader), Georgia, serif;
+
+  --type-masthead: clamp(4rem, 16vw, 15rem);
+  --type-section: clamp(3rem, 9vw, 8rem);
+  --type-index: clamp(1.5rem, 3vw, 2.6rem);
+  --type-utility: 0.6875rem;
+  --type-utility-sm: 0.5625rem;
+  --type-body: 1.125rem;
+  --leading-body: 1.6;
+  --measure-body: 62ch;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-rule: var(--rule);
+  --color-registration: var(--registration);
+  --color-masthead: var(--masthead);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 1px solid var(--registration);
+  outline-offset: 3px;
+}
+
+.utility {
+  font-family: var(--font-utility);
+  font-size: var(--type-utility);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* Shop-the-look editorial label — bold caps sans */
+.utility-label {
+  font-family: var(--font-utility);
+  font-size: var(--type-utility);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+/* Fine print under plates — small italic */
+.utility-fine {
+  font-family: var(--font-utility);
+  font-size: var(--type-utility-sm);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.95;
+  font-optical-sizing: auto;
+}
+
+.body-copy {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+  max-width: var(--measure-body);
+  font-weight: 400;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Magazine 3D stage — used from step 3 onward */
+.magazine-stage {
+  perspective: 2400px;
+  transform-style: preserve-3d;
+}
+
+@keyframes cover-caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}

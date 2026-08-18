@@ -1,0 +1,164 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import coverPhoto from "@/public/images/cover.jpg";
+import { issueMeta } from "@/content/works";
+import { useReducedMotion } from "@/lib/useReducedMotion";
+
+const ROLES = ["Photographer", "Writer", "Publisher"] as const;
+export const COVER_EASE = [0.22, 1, 0.36, 1] as const;
+
+type CoverProps = {
+  onOpen?: () => void;
+  turning?: boolean;
+};
+
+export default function Cover({ onOpen, turning = false }: CoverProps) {
+  const reducedMotion = useReducedMotion();
+  const [hovering, setHovering] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [peelLift, setPeelLift] = useState(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setPeelLift(8);
+      return;
+    }
+    // One breathe after mount as open hint
+    const t1 = window.setTimeout(() => setPeelLift(10), 800);
+    const t2 = window.setTimeout(() => setPeelLift(0), 1400);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [reducedMotion]);
+
+  const lift = hovering || focused ? 22 : peelLift;
+
+  const handleOpen = () => {
+    if (!turning) onOpen?.();
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label="Open the issue"
+      disabled={turning}
+      className="relative h-full w-full cursor-pointer overflow-hidden bg-[var(--paper)] text-left disabled:cursor-default"
+      style={{ containerType: "size" }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onClick={(event) => {
+        event.preventDefault();
+        handleOpen();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleOpen();
+        }
+      }}
+    >
+      <div className="absolute inset-0">
+        <Image
+          src={coverPhoto}
+          alt="Deniz Magdalena bent forward in a bridge pose against draped fabric, looking through the arch of her body"
+          fill
+          priority
+          placeholder="blur"
+          sizes="(max-width: 768px) 92vw, 50vw"
+          className="object-cover object-center"
+        />
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 top-[2.5%] z-20 flex justify-center px-[3%]">
+        <h1
+          className="display text-center text-[var(--masthead)] uppercase"
+          style={{
+            fontSize: "clamp(2.05rem, 14.75cqw, 5rem)",
+            fontWeight: 600,
+            lineHeight: 1.2,
+            whiteSpace: "nowrap",
+            paddingTop: "0.08em",
+            letterSpacing: "0.02em",
+            paddingLeft: "0.02em",
+          }}
+        >
+          Magdalena
+        </h1>
+      </div>
+
+      <div
+        className="pointer-events-none absolute inset-x-0 z-20 flex flex-col items-center gap-[0.4em]"
+        style={{ top: "54%" }}
+      >
+        {ROLES.map((role) => (
+          <p
+            key={role}
+            className="display text-[clamp(1.25rem,3.2vw,2rem)] text-[var(--paper)]"
+            style={{ letterSpacing: "0.04em" }}
+          >
+            {role}
+          </p>
+        ))}
+      </div>
+
+      <footer className="pointer-events-none absolute inset-x-0 bottom-[calc(10px+env(safe-area-inset-bottom))] z-20 px-[10px]">
+        <div className="flex flex-col items-start gap-[0.15rem] text-[var(--paper)]">
+          <p
+            className="utility opacity-90"
+            style={{
+              fontSize: "var(--type-utility-sm)",
+              letterSpacing: "0.16em",
+            }}
+          >
+            {issueMeta.location}
+          </p>
+          <p
+            className="utility opacity-90"
+            style={{
+              fontSize: "var(--type-utility-sm)",
+              letterSpacing: "0.16em",
+            }}
+          >
+            Contact:{" "}
+            <a
+              href={`mailto:${issueMeta.email}`}
+              className="pointer-events-auto underline-offset-4 [text-decoration-thickness:1px] hover:underline"
+              style={{ textDecorationColor: "var(--registration)" }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {issueMeta.email}
+            </a>
+          </p>
+        </div>
+      </footer>
+
+      <div
+        className="pointer-events-none absolute right-0 bottom-0 z-40 origin-bottom-right"
+        aria-hidden
+        style={{
+          width: 18 + lift * 0.28,
+          height: 18 + lift * 0.28,
+          transition: reducedMotion
+            ? "none"
+            : "width 0.32s cubic-bezier(0.22, 1, 0.36, 1), height 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
+          background: `linear-gradient(
+            to bottom right,
+            var(--peel-face-deep) 0%,
+            var(--peel-face) 44%,
+            var(--rule) 49%,
+            transparent 50%
+          )`,
+          boxShadow:
+            lift > 0
+              ? `-2px -3px ${5 + lift * 0.2}px rgba(11, 11, 11, 0.28)`
+              : "-1px -1px 3px rgba(11, 11, 11, 0.18)",
+        }}
+      />
+    </button>
+  );
+}
