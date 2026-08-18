@@ -1,6 +1,7 @@
 "use client";
 
 import IndexPage from "@/components/IndexPage";
+import SectionLivingBodySpread from "@/components/SectionLivingBodySpread";
 import SectionPhotoEssay from "@/components/SectionPhotoEssay";
 import SectionPoemSpread from "@/components/SectionPoemSpread";
 import SectionRiverBodySpread from "@/components/SectionRiverBodySpread";
@@ -25,6 +26,10 @@ export default function Spread({ spreadIndex, onNavigate }: SpreadProps) {
   }
 
   const work = getWorkBySpreadIndex(spreadIndex);
+
+  if (work?.id === "living-body") {
+    return <SectionLivingBodySpread work={work} />;
+  }
 
   if (work?.kind === "photography" && work.images.length >= 1) {
     return <SectionPhotoEssay work={work} />;

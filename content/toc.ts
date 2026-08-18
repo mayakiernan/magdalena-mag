@@ -49,6 +49,13 @@ export const tocSections: TocSection[] = [
         built: true,
       },
       {
+        id: "living-body",
+        title: "Living Body",
+        folio: folioOf("living-body"),
+        spreadIndex: spreadOf("living-body"),
+        built: true,
+      },
+      {
         id: "photo-lorem-1",
         title: "Lorem ipsum dolor sit amet",
         folio: null,
