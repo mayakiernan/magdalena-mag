@@ -9,23 +9,104 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 const ROLES = ["Photographer", "Writer", "Publisher"] as const;
 export const COVER_EASE = [0.22, 1, 0.36, 1] as const;
 
+const TYPE_MS = 70;
+const HOLD_MS = 380;
+const BETWEEN_MS = 260;
+const START_DELAY_MS = 500;
+
 type CoverProps = {
   onOpen?: () => void;
   turning?: boolean;
 };
+
+type TypedLine = {
+  text: string;
+  active: boolean;
+};
+
+function useRoleTypewriter(reducedMotion: boolean, paused: boolean): TypedLine[] {
+  const [lines, setLines] = useState<TypedLine[]>(() =>
+    ROLES.map((role) =>
+      reducedMotion
+        ? { text: role, active: false }
+        : { text: "", active: false },
+    ),
+  );
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setLines(ROLES.map((role) => ({ text: role, active: false })));
+      return;
+    }
+
+    if (paused) return;
+
+    let cancelled = false;
+    const timers: number[] = [];
+
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        timers.push(window.setTimeout(resolve, ms));
+      });
+
+    const run = async () => {
+      setLines(ROLES.map(() => ({ text: "", active: false })));
+      await wait(START_DELAY_MS);
+      if (cancelled) return;
+
+      for (let i = 0; i < ROLES.length; i++) {
+        const role = ROLES[i];
+        setLines((prev) =>
+          prev.map((line, idx) =>
+            idx === i ? { text: "", active: true } : { ...line, active: false },
+          ),
+        );
+
+        for (let n = 1; n <= role.length; n++) {
+          if (cancelled) return;
+          const slice = role.slice(0, n);
+          setLines((prev) =>
+            prev.map((line, idx) =>
+              idx === i ? { text: slice, active: true } : line,
+            ),
+          );
+          await wait(TYPE_MS);
+        }
+
+        if (cancelled) return;
+        setLines((prev) =>
+          prev.map((line, idx) =>
+            idx === i ? { ...line, active: false } : line,
+          ),
+        );
+        await wait(HOLD_MS);
+        if (i < ROLES.length - 1) await wait(BETWEEN_MS);
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+      timers.forEach((id) => window.clearTimeout(id));
+    };
+  }, [reducedMotion, paused]);
+
+  return lines;
+}
 
 export default function Cover({ onOpen, turning = false }: CoverProps) {
   const reducedMotion = useReducedMotion();
   const [hovering, setHovering] = useState(false);
   const [focused, setFocused] = useState(false);
   const [peelLift, setPeelLift] = useState(0);
+  const typedLines = useRoleTypewriter(reducedMotion, turning);
 
   useEffect(() => {
     if (reducedMotion) {
       setPeelLift(8);
       return;
     }
-    // One breathe after mount as open hint
     const t1 = window.setTimeout(() => setPeelLift(10), 800);
     const t2 = window.setTimeout(() => setPeelLift(0), 1400);
     return () => {
@@ -94,14 +175,22 @@ export default function Cover({ onOpen, turning = false }: CoverProps) {
       <div
         className="pointer-events-none absolute inset-x-0 z-20 flex flex-col items-center gap-[0.4em]"
         style={{ top: "54%" }}
+        aria-live="polite"
       >
-        {ROLES.map((role) => (
+        {typedLines.map((line, index) => (
           <p
-            key={role}
-            className="display text-[clamp(1.25rem,3.2vw,2rem)] text-[var(--paper)]"
+            key={ROLES[index]}
+            className="display min-h-[1.15em] text-[clamp(1.25rem,3.2vw,2rem)] text-[var(--paper)]"
             style={{ letterSpacing: "0.04em" }}
           >
-            {role}
+            {line.text}
+            {line.active ? (
+              <span
+                className="ml-[0.05em] inline-block w-[0.08em] animate-pulse bg-[var(--paper)] align-baseline"
+                style={{ height: "0.9em" }}
+                aria-hidden
+              />
+            ) : null}
           </p>
         ))}
       </div>
